@@ -11,7 +11,17 @@
 
 + (void)bgra8888toJpegBgra8888image:(nonnull AnalysisImageWrapper *)bgra8888image jpegQuality:(nonnull NSNumber *)jpegQuality completion:(nonnull void (^)(AnalysisImageWrapper * _Nullable, FlutterError * _Nullable))completion {
   NSData *bgra8888Data = bgra8888image.bytes.data;
-  CFDataRef cfData = (__bridge CFDataRef)bgra8888Data;
+  NSMutableData *mutableData = [bgra8888Data mutableCopy];
+  uint8_t *pixels = (uint8_t *)mutableData.mutableBytes;
+
+  // Swap Red and Blue channels
+  for (NSUInteger i = 0; i < mutableData.length; i += 4) {
+    uint8_t temp = pixels[i];         // Blue position
+    pixels[i] = pixels[i + 2];          // set Red
+    pixels[i + 2] = temp;               // set Blue
+  }
+
+  CFDataRef cfData = (__bridge CFDataRef)mutableData;
   
   CGDataProviderRef dataProvider = CGDataProviderCreateWithCFData(cfData);
   
